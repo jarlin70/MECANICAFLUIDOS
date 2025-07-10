@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Abastecimiento de Agua - Pativilca</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #0056b3;
+            --secondary-blue: #1e88e5;
+            --light-blue: #90caf9;
+            --accent-red: #e53935;
+            --dark-text: #2c3e50;
+            --light-text: #ecf0f1;
+            --background: #f5f7fa;
+            --section-bg: #ffffff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--dark-text);
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Navegación lateral */
+        .sidebar {
+            width: 280px;
+            background: rgba(30, 30, 46, 0.9);
+            padding: 25px 0;
+            box-shadow: var(--shadow);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .logo-container {
+            text-align: center;
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            color: var(--light-text);
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: var(--light-blue);
+        }
+
+        .nav-links {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 12px 25px;
+            display: flex;
+            align-items: center;
+            color: var(--light-text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            margin: 5px 0;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--light-blue);
+        }
+
+        .nav-item i {
+            margin-right: 15px;
+            font-size: 20px;
+        }
+
+        .toggle-sidebar {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(30, 30, 46, 0.9);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 101;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            font-size: 20px;
+        }
+
+        /* Contenido principal */
+        .content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 20px;
+            transition: margin 0.3s ease;
+        }
+
+        .content.full-width {
+            margin-left: 0;
+        }
+
+        .slides-container {
+            display: flex;
+            overflow-x: hidden;
+            scroll-snap-type: x mandatory;
+            height: calc(100vh - 40px);
+            scroll-behavior: smooth;
+        }
+
+        .slide {
+            min-width: 100%;
+            scroll-snap-align: start;
+            background: var(--section-bg);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideIn 0.6s forwards;
+            display: none;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-header {
+            border-bottom: 3px solid var(--primary-blue);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .slide-header::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background: var(--accent-red);
+        }
+
+        .slide-title {
+            font-size: 2.5rem;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .slide-subtitle {
+            font-size: 1.2rem;
+            color: var(--secondary-blue);
+            font-weight: 500;
+        }
+
+        .slide-content {
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .slide-content p {
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, var(--light-blue), var(--secondary-blue));
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: var(--primary-blue);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 30px 0;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: var(--primary-blue);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #e3f2fd;
+        }
+
+        .img-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, var(--light-blue), var(--secondary-blue));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            margin: 25px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 86, 179, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 86, 179, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .team-member {
+            text-align: center;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .team-member:hover {
+            transform: translateY(-10px);
+        }
+
+        .member-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--light-blue), var(--secondary-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .member-name {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+            color: var(--primary-blue);
+        }
+
+        .member-id {
+            color: var(--secondary-blue);
+            font-weight: 500;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        .progress-container {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-red), var(--primary-blue));
+            border-radius: 4px;
+            width: 10%;
+            transition: width 0.5s ease;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--light-text);
+            background: rgba(0, 0, 0, 0.2);
+            margin-top: 40px;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 250px;
+            }
+            .content {
+                margin-left: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.visible {
+                transform: translateX(0);
+            }
+            .content {
+                margin-left: 0;
+            }
+            .slide {
+                padding: 25px 20px;
+            }
+            .slide-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="toggle-sidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo-container">
+                <div class="logo">Sistema <span>Hídrico</span></div>
+                <div style="color: #90caf9; margin-top: 10px;">Pativilca - Barranca</div>
+            </div>
+            
+            <div class="nav-links">
+                <a href="#" class="nav-item active" data-target="slide-1">
+                    <i class="fas fa-home"></i>
+                    <span>Inicio</span>
+                </a>
+                <a href="#" class="nav-item" data-target="slide-2">
+                    <i class="fas fa-users"></i>
+                    <span>Equipo</span>
+                </a>
+                <a href="#" class="nav-item" data-target="slide-3">
+                    <i class="fas fa-book"></i>
+                    <span>Introducción</span>
+                </a>
+                <a href="#" class="nav-item" data-target="slide-4">
+                    <i class="fas fa-bullseye"></i>
+                    <span>Objetivos</span>
+                </a>
+                <a href="#" class="nav-item" data-target="slide-5">
+                    <i class="fas fa-calculator"></i>
+                    <span>Cálculos Hidrostáticos</span>
+                </a>
+                <a href="#" class="nav-item" data-target="slide-6">
+                    <i class="fas fa-wrench"></i>
+                    <span>Diseño del Sistema</span>
+                </a>
+                <a href="#" class="nav-item" data-target="slide-7">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Análisis con EPANET</span>
+                </a>
+                <a href="#" class="nav-item" data-target="slide-8">
+                    <i class="fas fa-water"></i>
+                    <span>Tanque de Almacenamiento</span>
+                </a>
+                <a href="#" class="nav-item" data-target="slide-9">
+                    <i class="fas fa-code-branch"></i>
+                    <span>Red de Tuberías</span>
+                </a>
+                <a href="#" class="nav-item" data-target="slide-10">
+                    <i class="fas fa-truck"></i>
+                    <span>Solución con Cisternas</span>
+                </a>
+                <a href="#" class="nav-item" data-target="slide-11">
+                    <i class="fas fa-sim-card"></i>
+                    <span>Simulación OpenFOAM</span>
+                </a>
+                <a href="#" class="nav-item" data-target="slide-12">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Conclusiones</span>
+                </a>
+                <a href="#" class="nav-item" data-target="slide-13">
+                    <i class="fas fa-book-open"></i>
+                    <span>Bibliografía</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="progress-container">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+            
+            <div class="slides-container">
+                <!-- Slide 1: Portada -->
+                <section id="slide-1" class="slide active">
+                    <div style="text-align: center; padding: 40px 0;">
+                        <div style="font-size: 1.2rem; color: var(--secondary-blue); margin-bottom: 20px;">
+                            UNIVERSIDAD DE INGENIERÍA Y TECNOLOGÍA
+                        </div>
+                        <h1 class="slide-title" style="font-size: 3.5rem; margin-bottom: 20px;">
+                            Sistema de Abastecimiento de Agua Potable Resiliente
+                        </h1>
+                        <div class="slide-subtitle" style="font-size: 1.8rem; margin-bottom: 40px;">
+                            Distrito de Pativilca - Barranca, Lima
+                        </div>
+                        
+                        <div style="max-width: 800px; margin: 0 auto 40px;">
+                            <div class="img-placeholder">
+                                IMAGEN: Mapa de ubicación de Pativilca
+                            </div>
+                        </div>
+                        
+                        <div style="font-size: 1.3rem; color: var(--primary-blue); margin-bottom: 30px;">
+                            <i class="fas fa-book"></i> Curso: Mecánica de Fluidos en Ingeniería Civil
+                        </div>
+                        
+                        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                            <div class="card" style="width: 250px;">
+                                <div class="card-header">
+                                    <i class="fas fa-user-tie"></i> Profesora
+                                </div>
+                                <div class="card-body" style="text-align: center;">
+                                    <div style="font-weight: bold; font-size: 1.2rem;">Carmela Christy</div>
+                                    <div>Ramos Orlando</div>
+                                </div>
+                            </div>
+                            
+                            <div class="card" style="width: 250px;">
+                                <div class="card-header">
+                                    <i class="fas fa-users"></i> Grupo
+                                </div>
+                                <div class="card-body" style="text-align: center;">
+                                    <div style="font-weight: bold; font-size: 1.2rem;">Grupo 1</div>
+                                    <div>Sección 1.01</div>
+                                </div>
+                            </div>
+                            
+                            <div class="card" style="width: 250px;">
+                                <div class="card-header">
+                                    <i class="fas fa-calendar"></i> Año
+                                </div>
+                                <div class="card-body" style="text-align: center;">
+                                    <div style="font-weight: bold; font-size: 1.2rem;">2025</div>
+                                    <div>Perú</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Slide 2: Equipo -->
+                <section id="slide-2" class="slide">
+                    <div class="slide-header">
+                        <h1 class="slide-title">Equipo de Trabajo</h1>
+                        <div class="slide-subtitle">Integrantes del proyecto</div>
+                    </div>
+                    
+                    <div class="team-grid">
+                        <div class="team-member">
+                            <div class="member-avatar">J</div>
+                            <h3 class="member-name">Flores Janampa, Jhojan</h3>
+                            <div class="member-id">202220140</div>
+                        </div>
+                        
+                        <div class="team-member">
+                            <div class="member-avatar">L</div>
+                            <h3 class="member-name">Lozano Ruiz, Jarlin Jhoel</h3>
+                            <div class="member-id">202220313</div>
+                        </div>
+                        
+                        <div class="team-member">
+                            <div class="member-avatar">Y</div>
+                            <h3 class="member-name">Poma Quispe, Yudit Margot</h3>
+                            <div class="member-id">202120448</div>
+                        </div>
+                        
+                        <div class="team-member">
+                            <div class="member-avatar">M</div>
+                            <h3 class="member-name">Suni Chino, Moises</h3>
+                            <div class="member-id">202220270</div>
+                        </div>
+                        
+                        <div class="team-member">
+                            <div class="member-avatar">J</div>
+                            <h3 class="member-name">Lavio Paredes, Joel</h3>
+                            <div class="member-id">202020095</div>
+                        </div>
+                        
+                        <div class="team-member">
+                            <div class="member-avatar">L</div>
+                            <h3 class="member-name">Vega Paucar, Liliana</h3>
+                            <div class="member-id">202220082</div>
+                        </div>
+                        
+                        <div class="team-member">
+                            <div class="member-avatar">L</div>
+                            <h3 class="member-name">Ricra Huanaco Luis Miguel</h3>
+                            <div class="member-id">202120487</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Slide 3: Introducción -->
+                <section id="slide-3" class="slide">
+                    <div class="slide-header">
+                        <h1 class="slide-title">Introducción</h1>
+                        <div class="slide-subtitle">Contexto del proyecto</div>
+                    </div>
+                    
+                    <div class="slide-content">
+                        <p>En el campo de la ingeniería civil, la mecánica de fluidos juega un papel crucial en la solución de problemas de infraestructura y gestión de recursos hídricos en diversas regiones del Perú.</p>
+                        
+                        <div class="img-placeholder" style="height: 250px;">
+                            IMAGEN: Problemas de acceso al agua en Pativilca
+                        </div>
+                        
+                        <p>Este proyecto se centra en el diseño de un sistema de abastecimiento de agua para un sector específico del distrito de Pativilca, ubicado en la provincia de Barranca, dentro del departamento de Lima.</p>
+                        
+                        <p>Este sector de Pativilca enfrenta desafíos significativos en el acceso al agua potable, lo que afecta la calidad de vida de sus residentes y limita el desarrollo de la zona.</p>
+                        
+                        <div class="card-container">
+                            <div class="card">
+                                <div class="card-header">Problemática</div>
+                                <div class="card-body">
+                                    <p>La falta de acceso a agua potable tiene consecuencias negativas en la salud, el saneamiento y el desarrollo socioeconómico de la comunidad.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">Solución</div>
+                                <div class="card-body">
+                                    <p>Este proyecto busca contribuir a mejorar esta situación, promoviendo un uso sostenible de los recursos hídricos.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">ODS</div>
+                                <div class="card-body">
+                                    <p>El proyecto se alinea con los Objetivos de Desarrollo Sostenible (ODS), en particular el ODS 6 (Agua Limpia y Saneamiento).</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Fases del Proyecto</h3>
+                        <ol style="padding-left: 30px; line-height: 2;">
+                            <li><span class="highlight">Análisis y Caracterización del Área de Estudio</span>: Estudio detallado del sector, incluyendo topografía y distribución de población.</li>
+                            <li><span class="highlight">Diseño del Sistema de Abastecimiento</span>: Red de tuberías, tanque de almacenamiento y otros componentes.</li>
+                            <li><span class="highlight">Evaluación y Optimización del Sistema</span>: Uso de herramientas de simulación para evaluar el desempeño.</li>
+                        </ol>
+                    </div>
+                </section>
+
+                <!-- Slide 4: Objetivos -->
+                <section id="slide-4" class="slide">
+                    <div class="slide-header">
+                        <h1 class="slide-title">Objetivos del Proyecto</h1>
+                        <div class="slide-subtitle">Metas generales y específicas</div>
+                    </div>
+                    
+                    <div class="slide-content">
+                        <div class="card" style="margin-bottom: 30px; background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
+                            <div class="card-header" style="background: var(--primary-blue);">Objetivo General</div>
+                            <div class="card-body">
+                                <p>Desarrollar una propuesta técnica para el diseño de un sistema hidráulico de abastecimiento por gravedad en la localidad de Pativilca, aplicando los principios fundamentales de la mecánica de fluidos y considerando criterios topográficos y normativos.</p>
+                                <p>Implementar un modelo de red de tuberías que garantice un abastecimiento eficiente y constante, utilizando herramientas como EPANET para validar la distribución de presiones y caudales.</p>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Objetivos Específicos</h3>
+                        
+                        <div class="card-container">
+                            <div class="card">
+                                <div class="card-body">
+                                    <i class="fas fa-map" style="font-size: 2rem; color: var(--primary-blue); margin-bottom: 15px;"></i>
+                                    <p>Analizar las condiciones geográficas y topográficas del área para establecer criterios de diseño.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <i class="fas fa-location-dot" style="font-size: 2rem; color: var(--primary-blue); margin-bottom: 15px;"></i>
+                                    <p>Determinar la ubicación óptima del tanque elevado y la traza más eficiente de la red.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <i class="fas fa-weight-hanging" style="font-size: 2rem; color: var(--primary-blue); margin-bottom: 15px;"></i>
+                                    <p>Calcular las presiones y empujes hidrostáticos que actúan sobre las superficies del tanque.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <i class="fas fa-ruler-combined" style="font-size: 2rem; color: var(--primary-blue); margin-bottom: 15px;"></i>
+                                    <p>Dimensionar la red principal y secundaria de tuberías definiendo diámetros y materiales adecuados.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <i class="fas fa-water" style="font-size: 2rem; color: var(--primary-blue); margin-bottom: 15px;"></i>
+                                    <p>Simular hidráulicamente el sistema propuesto con EPANET.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <i class="fas fa-calculator" style="font-size: 2rem; color: var(--primary-blue); margin-bottom: 15px;"></i>
+                                    <p>Aplicar la ecuación de Bernoulli y el concepto de línea de energía para interpretar el comportamiento del flujo.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Slide 5: Cálculos Hidrostáticos -->
+                <section id="slide-5" class="slide">
+                    <div class="slide-header">
+                        <h1 class="slide-title">Cálculos Hidrostáticos</h1>
+                        <div class="slide-subtitle">Población, dotación de agua y dimensionamiento</div>
+                    </div>
+                    
+                    <div class="slide-content">
+                        <div class="card-container">
+                            <div class="card">
+                                <div class="card-header">Población Actual</div>
+                                <div class="card-body">
+                                    <div style="font-size: 2.5rem; color: var(--primary-blue); text-align: center; font-weight: bold;">
+                                        2,320
+                                    </div>
+                                    <p style="text-align: center;">habitantes</p>
+                                    <div style="margin-top: 15px;">
+                                        <p><i class="fas fa-home"></i> 580 viviendas</p>
+                                        <p><i class="fas fa-users"></i> 4 habitantes por vivienda</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">Población Futura</div>
+                                <div class="card-body">
+                                    <div style="font-size: 2.5rem; color: var(--primary-blue); text-align: center; font-weight: bold;">
+                                        2,662
+                                    </div>
+                                    <p style="text-align: center;">habitantes (proyección 15 años)</p>
+                                    <div style="margin-top: 15px;">
+                                        <p><i class="fas fa-chart-line"></i> Tasa de crecimiento: 0.92%</p>
+                                        <p>𝑃<sub>final</sub> = 2320 × (0.92% + 1)<sup>15</sup></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">Dotación de Agua</div>
+                                <div class="card-body">
+                                    <div style="font-size: 2.5rem; color: var(--primary-blue); text-align: center; font-weight: bold;">
+                                        150
+                                    </div>
+                                    <p style="text-align: center;">Lt/día/habitante</p>
+                                    <div style="margin-top: 15px;">
+                                        <p><i class="fas fa-info-circle"></i> Según Norma OS.050</p>
+                                        <p>Clima cálido, población entre 2,000-10,000 habitantes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Caudales de Diseño</h3>
+                        
+                        <div class="table-container">
+                            <table>
+                                <tr>
+                                    <th>Tipo de Caudal</th>
+                                    <th>Fórmula</th>
+                                    <th>Valor (lt/s)</th>
+                                </tr>
+                                <tr>
+                                    <td>Caudal Promedio (Q<sub>P</sub>)</td>
+                                    <td>𝑄<sub>𝑃</sub> = (Población × Dotación) / 86400</td>
+                                    <td>4.622</td>
+                                </tr>
+                                <tr>
+                                    <td>Caudal Máximo Horario</td>
+                                    <td>𝑄<sub>max</sub> = 𝑄<sub>𝑃</sub> × K<sub>2</sub></td>
+                                    <td>11.555</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Volumen del Tanque de Almacenamiento</h3>
+                        
+                        <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                            <p><span class="highlight">Volumen de regulación (V<sub>Reg</sub>)</span> = 25% del consumo promedio diario = 99,835.2 lt</p>
+                            <p><span class="highlight">Volumen de reserva (V<sub>Res</sub>)</span> = 10% del volumen de regulación = 9,983.52 lt</p>
+                            <p><span class="highlight">Volumen total</span> = V<sub>Reg</sub> + V<sub>Res</sub> = 109,818.72 lt ≈ 110 m³</p>
+                        </div>
+                        
+                        <div class="img-placeholder" style="height: 300px;">
+                            IMAGEN: Diagrama del tanque de almacenamiento
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Slide 6: Diseño del Sistema -->
+                <section id="slide-6" class="slide">
+                    <div class="slide-header">
+                        <h1 class="slide-title">Diseño del Sistema</h1>
+                        <div class="slide-subtitle">Componentes principales</div>
+                    </div>
+                    
+                    <div class="slide-content">
+                        <div class="card-container">
+                            <div class="card">
+                                <div class="card-header">Tanque Elevado</div>
+                                <div class="card-body">
+                                    <p><i class="fas fa-arrows-up-down"></i> Altura: 12 metros</p>
+                                    <p><i class="fas fa-weight-hanging"></i> Presión generada: 1.47 bar</p>
+                                    <p><i class="fas fa-ruler-combined"></i> Diámetro: 10 metros</p>
+                                    <p><i class="fas fa-ruler"></i> Altura de agua: 9 metros</p>
+                                    <p><i class="fas fa-flask"></i> Material: Concreto puro</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">Características del Terreno</div>
+                                <div class="card-body">
+                                    <p><i class="fas fa-map"></i> Distrito de Pativilca, Barranca, Lima</p>
+                                    <p><i class="fas fa-mountain"></i> Topografía: Ligeramente ondulada</p>
+                                    <p><i class="fas fa-ruler-horizontal"></i> Superficie: 260.24 km²</p>
+                                    <p><i class="fas fa-arrow-up"></i> Altitud: 81 msnm</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Límites del Distrito</h3>
+                        
+                        <div class="table-container">
+                            <table>
+                                <tr>
+                                    <th>Dirección</th>
+                                    <th>Limita con</th>
+                                </tr>
+                                <tr>
+                                    <td>Norte</td>
+                                    <td>Distrito de Paramonga</td>
+                                </tr>
+                                <tr>
+                                    <td>Este</td>
+                                    <td>Distrito de Cochas</td>
+                                </tr>
+                                <tr>
+                                    <td>Sur</td>
+                                    <td>Distrito de Barranca</td>
+                                </tr>
+                                <tr>
+                                    <td>Oeste</td>
+                                    <td>Océano Pacífico</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Fuerzas Hidrostáticas</h3>
+                        
+                        <div class="table-container">
+                            <table>
+                                <tr>
+                                    <th>Fuerza</th>
+                                    <th>Magnitud (N)</th>
+                                    <th>Ubicación Y<sub>p</sub> (m)</th>
+                                </tr>
+                                <tr>
+                                    <td>FR1 (Lateral)</td>
+                                    <td>3,973,050</td>
+                                    <td>6</td>
+                                </tr>
+                                <tr>
+                                    <td>FR2 (Inferior)</td>
+                                    <td>6,934,276.98</td>
+                                    <td>9</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="img-placeholder" style="height: 300px;">
+                            IMAGEN: Diagrama de fuerzas hidrostáticas
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Slide 7: Análisis con EPANET -->
+                <section id="slide-7" class="slide">
+                    <div class="slide-header">
+                        <h1 class="slide-title">Análisis con EPANET</h1>
+                        <div class="slide-subtitle">Simulación hidráulica del sistema</div>
+                    </div>
+                    
+                    <div class="slide-content">
+                        <p>EPANET es un software de dominio público que realiza simulaciones hidráulicas y de calidad de agua en redes de tuberías a presión.</p>
+                        
+                        <div class="card-container">
+                            <div class="card">
+                                <div class="card-header">Parámetros de Simulación</div>
+                                <div class="card-body">
+                                    <p><i class="fas fa-project-diagram"></i> 24 nodos de distribución</p>
+                                    <p><i class="fas fa-pipe"></i> Tubería principal: 6"</p>
+                                    <p><i class="fas fa-pipe"></i> Tubería secundaria: 4"</p>
+                                    <p><i class="fas fa-pipe"></i> Tubería terciaria: 2"</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">Resultados</div>
+                                <div class="card-body">
+                                    <p><i class="fas fa-tachometer-alt"></i> Presión mínima: 10 m.c.a.</p>
+                                    <p><i class="fas fa-water"></i> Caudal máximo: 11.555 lt/s</p>
+                                    <p><i class="fas fa-bolt"></i> Velocidad en tuberías: 0.3-2.5 m/s</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="img-placeholder" style="height: 400px;">
+                            IMAGEN: Diseño del sistema en EPANET
+                        </div>
+                        
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Desafíos Técnicos</h3>
+                        <ul style="padding-left: 30px; line-height: 2;">
+                            <li>Dificultad en la visualización de presiones en los nodos</li>
+                            <li>Configuraciones no depuradas en el modelo</li>
+                            <li>Ausencia de nodo de referencia con carga adecuada</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- Slide 8: Tanque de Almacenamiento -->
+                <section id="slide-8" class="slide">
+                    <div class="slide-header">
+                        <h1 class="slide-title">Tanque de Almacenamiento</h1>
+                        <div class="slide-subtitle">Diseño y características</div>
+                    </div>
+                    
+                    <div class="slide-content">
+                        <div class="card-container">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h3 class="card-title">Ventajas del Tanque Elevado</h3>
+                                    <ul style="padding-left: 20px; line-height: 2;">
+                                        <li>Permite que el agua fluya por gravedad</li>
+                                        <li>Garantiza presión constante en la red</li>
+                                        <li>Reduce costos de operación al evitar bombeo</li>
+                                        <li>Almacena agua para periodos de alta demanda</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <h3 class="card-title">Dimensiones</h3>
+                                    <p><i class="fas fa-ruler-combined"></i> Diámetro: 10 metros</p>
+                                    <p><i class="fas fa-ruler-vertical"></i> Altura: 9 metros</p>
+                                    <p><i class="fas fa-flask"></i> Material: Concreto puro</p>
+                                    <p><i class="fas fa-weight-hanging"></i> Volumen: 200 m³ (redondeado)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <h3 class="card-title">Compuerta de Salida</h3>
+                                    <p><i class="fas fa-ruler"></i> Diámetro calculado: 60.065 mm</p>
+                                    <p><i class="fas fa-tachometer-alt"></i> Velocidad de flujo: 2 m/s</p>
+                                    <p><i class="fas fa-calculator"></i> Área: 5.775 × 10⁻³ m²</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="img-placeholder" style="height: 350px;">
+                            IMAGEN: Modelo 3D del tanque de almacenamiento
+                        </div>
+                        
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Cálculo del Tiempo de Vaciado</h3>
+                        <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                            <p>Velocidad de salida: 2 m/s</p>
+                            <p>Área del orificio: A = π × r² = π × (0.060647)² ≈ 0.01155 m²</p>
+                            <p>Caudal: Q = A × V = 0.01155 × 2 = 0.0231 m³/s</p>
+                            <p>Tiempo de vaciado: T = Volumen / Q = 200 / 0.0231 ≈ 8,658 segundos ≈ 2.4 horas</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Slide 9: Red de Tuberías -->
+                <section id="slide-9" class="slide">
+                    <div class="slide-header">
+                        <h1 class="slide-title">Red de Tuberías</h1>
+                        <div class="slide-subtitle">Diseño y dimensionamiento</div>
+                    </div>
+                    
+                    <div class="slide-content">
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Normativa Técnica (OS.050)</h3>
+                        <ul style="padding-left: 30px; line-height: 2; margin-bottom: 25px;">
+                            <li>Diámetro mínimo para tuberías principales: 63 mm (2½")</li>
+                            <li>Velocidad máxima permisible: 2.5 m/s (normal), 3.0 m/s (máxima)</li>
+                            <li>Velocidad mínima: 0.3 m/s para evitar sedimentación</li>
+                            <li>Presión mínima: 10 m.c.a. en el punto más desfavorable</li>
+                        </ul>
+                        
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Materiales Utilizados</h3>
+                        <div class="table-container">
+                            <table>
+                                <tr>
+                                    <th>Material</th>
+                                    <th>Aplicación Principal</th>
+                                    <th>Características</th>
+                                </tr>
+                                <tr>
+                                    <td>PVC (clase 7.5 o superior)</td>
+                                    <td>Redes de distribución</td>
+                                    <td>Ligero, resistente a la corrosión</td>
+                                </tr>
+                                <tr>
+                                    <td>PEAD (Polietileno de Alta Densidad)</td>
+                                    <td>Conexiones domiciliarias y redes secundarias</td>
+                                    <td>Alta flexibilidad y durabilidad</td>
+                                </tr>
+                                <tr>
+                                    <td>Fierro Dúctil (DI)</td>
+                                    <td>Redes principales y troncales</td>
+                                    <td>Alta resistencia mecánica</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Dimensionamiento de Tuberías</h3>
+                        <div class="table-container">
+                            <table>
+                                <tr>
+                                    <th>Tubería</th>
+                                    <th>Cota Inicial (msnm)</th>
+                                    <th>Cota Final (msnm)</th>
+                                    <th>Longitud (m)</th>
+                                </tr>
+                                <tr>
+                                    <td>PRINCIPAL</td>
+                                    <td>131</td>
+                                    <td>89</td>
+                                    <td>725</td>
+                                </tr>
+                                <tr>
+                                    <td>SEC 1 (1-12)</td>
+                                    <td>123</td>
+                                    <td>117</td>
+                                    <td>180</td>
+                                </tr>
+                                <tr>
+                                    <td>SEC 2 (2-13)</td>
+                                    <td>117</td>
+                                    <td>125</td>
+                                    <td>142</td>
+                                </tr>
+                                <tr>
+                                    <td>SEC 3 (3-9)</td>
+                                    <td>111</td>
+                                    <td>102</td>
+                                    <td>179</td>
+                                </tr>
+                                <tr>
+                                    <td>SEC 4 (4-14)</td>
+                                    <td>108</td>
+                                    <td>115</td>
+                                    <td>198</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="img-placeholder" style="height: 300px;">
+                            IMAGEN: Diagrama de la red de tuberías
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Slide 10: Solución con Cisternas -->
+                <section id="slide-10" class="slide">
+                    <div class="slide-header">
+                        <h1 class="slide-title">Solución con Cisternas</h1>
+                        <div class="slide-subtitle">Para zonas de difícil acceso</div>
+                    </div>
+                    
+                    <div class="slide-content">
+                        <p>Debido a la ubicación de la zona, existen ciertos lugares con pendientes de difícil acceso a los cuales la presión del caudal en las tuberías no es suficiente. Para ello se implementa el uso de cisternas para la distribución de agua potable.</p>
+                        
+                        <div class="card-container">
+                            <div class="card">
+                                <div class="card-header">Características del Vehículo Cisterna</div>
+                                <div class="card-body">
+                                    <ul style="padding-left: 20px; line-height: 2;">
+                                        <li>Capacidad: 2,500 litros</li>
+                                        <li>Compartimentos internos: 4</li>
+                                        <li>Material: Acero inoxidable resistente a la corrosión</li>
+                                        <li>Sistema de válvulas independiente</li>
+                                        <li>Válvulas de alivio de presión</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="img-placeholder" style="height: 250px; margin: 0;">
+                                        IMAGEN: Camión cisterna
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Especificaciones Técnicas</h3>
+                        <div class="table-container">
+                            <table>
+                                <tr>
+                                    <th>Característica</th>
+                                    <th>Valor</th>
+                                </tr>
+                                <tr>
+                                    <td>Marca</td>
+                                    <td>Mercedes-Benz</td>
+                                </tr>
+                                <tr>
+                                    <td>Modelo</td>
+                                    <td>Atego 1725</td>
+                                </tr>
+                                <tr>
+                                    <td>Potencia</td>
+                                    <td>245cv @ 2200 rpm</td>
+                                </tr>
+                                <tr>
+                                    <td>Cilindrada</td>
+                                    <td>6374 cc</td>
+                                </tr>
+                                <tr>
+                                    <td>Torque</td>
+                                    <td>900 Nm</td>
+                                </tr>
+                                <tr>
+                                    <td>Precio Unitario</td>
+                                    <td>S/ 399,000.00</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Slide 11: Simulación OpenFOAM -->
+                <section id="slide-11" class="slide">
+                    <div class="slide-header">
+                        <h1 class="slide-title">Simulación OpenFOAM</h1>
+                        <div class="slide-subtitle">Análisis computacional de fluidos</div>
+                    </div>
+                    
+                    <div class="slide-content">
+                        <p>OpenFOAM es un software de código abierto para dinámica de fluidos computacional (CFD) utilizado para simular el comportamiento de fluidos en diversas condiciones.</p>
+                        
+                        <div class="card-container">
+                            <div class="card">
+                                <div class="card-header">Proceso de Simulación</div>
+                                <div class="card-body">
+                                    <ol style="padding-left: 20px; line-height: 2;">
+                                        <li>Creación de geometría en SALOME</li>
+                                        <li>Generación de malla</li>
+                                        <li>Importación a OpenFOAM</li>
+                                        <li>Definición de condiciones de contorno</li>
+                                        <li>Ejecución de la simulación</li>
+                                        <li>Análisis de resultados</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="img-placeholder" style="height: 250px; margin: 0;">
+                                        IMAGEN: Visualización de presiones en OpenFOAM
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Resultados de la Simulación</h3>
+                        
+                        <div class="card-container">
+                            <div class="card">
+                                <div class="card-header">Distribución de Presiones</div>
+                                <div class="card-body">
+                                    <div class="img-placeholder" style="height: 200px; margin: 0 0 15px;">
+                                        IMAGEN: Mapa de presiones
+                                    </div>
+                                    <p>La simulación muestra una distribución uniforme de presiones en el sistema, con valores dentro de los parámetros normativos.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">Perfil de Velocidades</div>
+                                <div class="card-body">
+                                    <div class="img-placeholder" style="height: 200px; margin: 0 0 15px;">
+                                        IMAGEN: Mapa de velocidades
+                                    </div>
+                                    <p>Se observan velocidades entre 0.5-2.2 m/s en la mayoría de los tramos, dentro del rango permitido por la norma OS.050.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Slide 12: Conclusiones -->
+                <section id="slide-12" class="slide">
+                    <div class="slide-header">
+                        <h1 class="slide-title">Conclusiones</h1>
+                        <div class="slide-subtitle">Resultados y logros del proyecto</div>
+                    </div>
+                    
+                    <div class="slide-content">
+                        <div class="card" style="margin-bottom: 30px; background: linear-gradient(135deg, #e3f2fd, #bbdefb);">
+                            <div class="card-body">
+                                <ol style="padding-left: 30px; line-height: 2;">
+                                    <li><span class="highlight">Diseño técnico fundamentado</span>: El sistema se basó en fundamentos hidrostáticos sólidos, aplicando correctamente los principios de presión, volumen y dimensionamiento.</li>
+                                    
+                                    <li><span class="highlight">Cálculos hidrostáticos coherentes</span>: Se realizaron estimaciones detalladas de dotación, volumen del tanque, diámetro de tuberías y análisis de presiones.</li>
+                                    
+                                    <li><span class="highlight">Aplicación de software de simulación</span>: La integración de SALOME, OpenFOAM y EPANET permitió verificar la estructura del dominio y las zonas de frontera.</li>
+                                    
+                                    <li><span class="highlight">Viabilidad práctica del diseño</span>: Las dimensiones obtenidas permiten concluir que el sistema propuesto es técnica y operativamente viable.</li>
+                                    
+                                    <li><span class="highlight">Base para análisis CFD futuro</span>: La correcta estructuración de la malla en OpenFOAM deja el proyecto listo para avanzar hacia simulaciones más complejas.</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin: 25px 0 15px; color: var(--primary-blue);">Recomendaciones</h3>
+                        
+                        <div class="card-container">
+                            <div class="card">
+                                <div class="card-header">Profundizar en simulaciones CFD</div>
+                                <div class="card-body">
+                                    <p>Avanzar hacia simulaciones completas de dinámica de fluidos en OpenFOAM, con condiciones de entrada y salida realistas.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">Validación experimental</div>
+                                <div class="card-body">
+                                    <p>Comparar los resultados obtenidos mediante simulación con mediciones experimentales para validar el desempeño del sistema.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">Incluir escenarios de emergencia</div>
+                                <div class="card-body">
+                                    <p>Simular fallos como rotura de tubería o sobrepresiones para prever medidas de seguridad o válvulas de alivio.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">Evaluar comportamiento térmico</div>
+                                <div class="card-body">
+                                    <p>Analizar los efectos térmicos sobre el fluido, especialmente si se almacenará por periodos prolongados.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Slide 13: Bibliografía -->
+                <section id="slide-13" class="slide">
+                    <div class="slide-header">
+                        <h1 class="slide-title">Bibliografía</h1>
+                        <div class="slide-subtitle">Fuentes consultadas</div>
+                    </div>
+                    
+                    <div class="slide-content">
+                        <div style="background: #f8f9fa; padding: 25px; border-radius: 10px;">
+                            <ol style="line-height: 2; padding-left: 30px;">
+                                <li>American Petroleum Institute. (2020). <i>API Standard 650: Welded tanks for oil storage</i>.</li>
+                                
+                                <li>Cengel, Y. A., & Cimbala, J. M. (2014). <i>Mecánica de fluidos: Fundamentos y aplicaciones (3.ª ed.)</i>. McGraw-Hill Education.</li>
+                                
+                                <li>Guevara Marenco, J. (2020). <i>Diseño de sistemas de abastecimiento de agua en zonas rurales</i> (Tesis de maestría). Universidad Nacional de Ingeniería.</li>
+                                
+                                <li>Instituto Nacional de Calidad (INACAL). (s.f.). <i>Norma Técnica Peruana NTP ISO 1452: Sistemas de tuberías plásticas para suministro de agua bajo presión</i>.</li>
+                                
+                                <li>Instituto Nacional de Estadística e Informática (INEI). (s.f.). <i>Perú: Estimaciones y proyecciones de población departamental, por años calendario y edad simple, 1995–2030</i>.</li>
+                                
+                                <li>Ministerio de Vivienda, Construcción y Saneamiento (MVCS). (2006). <i>RNE – Título III: Instalaciones sanitarias (R$.010)</i>.</li>
+                                
+                                <li>Morán, M. J., & Shapiro, H. N. (2012). <i>Fundamentals of engineering thermodynamics (7th ed.)</i>. John Wiley & Sons.</li>
+                                
+                                <li>Munson, B. R., Young, D. F., Oklishi, T. H., & Huebsch, W. W. (2013). <i>Fundamentals of fluid mechanics (7th ed.)</i>. Wiley.</li>
+                                
+                                <li>Pavco Wavin. (s.f.). <i>Tubería PVC presión clase 6</i>.</li>
+                                
+                                <li>Superintendencia Nacional de Servicios de Saneamiento (SUNASS). (2020). <i>Reglamento de la calidad de la prestación de los servicios de saneamiento</i>.</li>
+                                
+                                <li>White, F. M. (2011). <i>Fluid mechanics (7th ed.)</i>. McGraw-Hill.</li>
+                            </ol>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 40px;">
+                            <div class="logo" style="color: var(--primary-blue);">Sistema <span style="color: var(--secondary-blue);">Hídrico</span></div>
+                            <div style="font-size: 1.2rem; color: var(--secondary-blue); margin-top: 10px;">Pativilca - Barranca</div>
+                            <div style="margin-top: 20px; color: var(--dark-text);">Proyecto de Mecánica de Fluidos</div>
+                            <div style="color: var(--dark-text);">Universidad de Ingeniería y Tecnología</div>
+                            <div style="color: var(--dark-text); margin-top: 10px;">2025</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-outline" id="prevBtn">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <button class="btn" id="nextBtn">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            
+            <footer>
+                <p>Proyecto de Diseño de un Sistema de Abastecimiento de Agua Potable Resiliente para el distrito de Pativilca</p>
+                <p>Aplicando los principios de Mecánica de Fluidos - Grupo 1 - 2025</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const navItems = document.querySelectorAll('.nav-item');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const progressBar = document.getElementById('progress');
+            const toggleSidebarBtn = document.querySelector('.toggle-sidebar');
+            const sidebar = document.querySelector('.sidebar');
+            const content = document.querySelector('.content');
+            
+            let currentSlide = 0;
+            
+            // Mostrar slide actual
+            function showSlide(index) {
+                // Ocultar todos los slides
+                slides.forEach(slide => {
+                    slide.classList.remove('active');
+                });
+                
+                // Quitar clase active de todos los ítems de navegación
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Mostrar slide seleccionado
+                slides[index].classList.add('active');
+                
+                // Activar ítem de navegación correspondiente
+                navItems[index].classList.add('active');
+                
+                // Actualizar barra de progreso
+                progressBar.style.width = `${(index + 1) / slides.length * 100}%`;
+                
+                // Actualizar índice de slide actual
+                currentSlide = index;
+                
+                // Scroll al inicio del slide
+                slides[index].scrollTop = 0;
+            }
+            
+            // Navegación por los ítems del menú
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = this.getAttribute('data-target');
+                    const slideIndex = Array.from(slides).findIndex(slide => slide.id === target);
+                    if (slideIndex !== -1) {
+                        showSlide(slideIndex);
+                    }
+                });
+            });
+            
+            // Botones de navegación
+            prevBtn.addEventListener('click', function() {
+                if (currentSlide > 0) {
+                    showSlide(currentSlide - 1);
+                }
+            });
+            
+            nextBtn.addEventListener('click', function() {
+                if (currentSlide < slides.length - 1) {
+                    showSlide(currentSlide + 1);
+                }
+            });
+            
+            // Alternar visibilidad de la barra lateral
+            toggleSidebarBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('hidden');
+                content.classList.toggle('full-width');
+            });
+            
+            // Inicializar mostrando el primer slide
+            showSlide(0);
+            
+            // Navegación con teclado
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft' && currentSlide > 0) {
+                    showSlide(currentSlide - 1);
+                } else if (e.key === 'ArrowRight' && currentSlide < slides.length - 1) {
+                    showSlide(currentSlide + 1);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
